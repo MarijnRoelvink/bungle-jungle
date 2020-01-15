@@ -102,6 +102,9 @@ void messageReceived(String &topic, String &payload) {
     if (msg.startsWith("step")) {
       failsafe = millis();
     }
+    if(msg.startsWith("idle-mode" && state == OFF) {
+      setState(INACTIVE);
+    }
   }
   else if (getVar("setting").value == 2) {
     gameMsg(msg);
