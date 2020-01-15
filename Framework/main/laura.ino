@@ -52,7 +52,7 @@ void initLauraIdle() {
   } else if (lastOn == 0 && id == 1) {
     setLauraState(L_FIREFLY);
   } else {
-    setLauraState(OFF);
+    setLauraState(L_OFF);
   }
 }
 

@@ -10,7 +10,18 @@ void initMarijnIdle() {
 
 void marijnIdle() {
   if (on) {
-    showColor(125, 125, 255);
+    double fadeTime = mWaitingTime * getVar("m_fade_percentage").value / (100 * 2.0);
+    double fadeValue = 1;
+    if (millis() - mLastSwitch < fadeTime) {
+      //fade in
+      fadeValue = (millis() - mLastSwitch) / fadeTime;
+    } 
+    else if (millis() - mLastSwitch > mWaitingTime - fadeTime) {
+      //fade out
+      fadeValue = -1 * ((millis() - (mLastSwitch + mWaitingTime - fadeTime)) / fadeTime - 1);
+    }
+    //show colors
+    showColor(fadeValue*125, fadeValue*125, fadeValue*255);
   }
   if (millis() - mLastSwitch > mWaitingTime) {
     on = !on;

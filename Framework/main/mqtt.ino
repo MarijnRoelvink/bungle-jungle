@@ -40,7 +40,7 @@ void resetMqtt() {
   connect();
 }
 
-int getId(String msg) {
+int getNumber(String msg) {
   int index = msg.indexOf(" ");
   if (index != -1) {
     return msg.substring(index, msg.length()).toInt();
@@ -94,7 +94,7 @@ void messageReceived(String &topic, String &payload) {
       if(state == INACTIVE) {
         setState(OFF);
       }
-      lastOn = getId(msg);
+      lastOn = getNumber(msg);
     }
     if (msg == "failsafe") {
       failsafe = millis();
@@ -102,8 +102,11 @@ void messageReceived(String &topic, String &payload) {
     if (msg.startsWith("step")) {
       failsafe = millis();
     }
-    if(msg.startsWith("idle-mode" && state == OFF) {
+    if(msg.startsWith("idle-mode") && state == OFF) {
       setState(INACTIVE);
+    }
+    if(msg.startsWith("color-index")) {
+      currIndex = (getNumber(msg) + 1) % colourSize; 
     }
   }
   else if (getVar("setting").value == 2) {

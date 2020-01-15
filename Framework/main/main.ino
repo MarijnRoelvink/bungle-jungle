@@ -46,7 +46,7 @@ Var vars[] = {
   //global vars
   {"threshold", 4},
   {"waittime", 5 * 1000},
-  {"idle_setting", 1},
+  {"idle_setting", 2},
   {"setting", 1 },
   {"fading_time", 1000},
   
@@ -58,9 +58,22 @@ Var vars[] = {
   //marijn idle vars
   {"m_firefly_period", 1000},
   {"m_timeout_period", 10000},
+  {"m_fade_percentage", 50}
 
 };
 
+int colourSize = 7;
+Colour colours[] = {
+  {100, 0, 0}, //red
+  {100, 50, 0}, //orange
+  {100, 100, 0}, //yellow
+  {0, 100, 0}, //green
+  {0, 0, 100}, //blue
+  {100, 0, 100}, //purple
+  {100, 0, 50}, //pink
+};
+
+int currIndex = 0;
 int id = 14;                         //change per step
 int lastOn = 0;
 const int NEIGHBOURSIZE = getNeighboursSize(id);
@@ -157,17 +170,8 @@ void setState(State newState) {
     case STEPPING:
       {
         sendMessage("all", onstring);
-
-        //TODO: make here a non-random color
-        int randR = random(50, 250), randG = random(50, 250), randB = random(50, 250);
-        if (randR + randG > 250) {
-          randB = 0;
-        } if (randR + randB > 250) {
-          randG = 0;
-        } if (randB + randG > 250) {
-          randR = 0;
-        }
-        currColor = {randR, randG, randB};
+        sendMessage("all", "color-index " + String(currIndex));
+        currColor = colours[currIndex];
         break;
       }
     case STEPPED:
