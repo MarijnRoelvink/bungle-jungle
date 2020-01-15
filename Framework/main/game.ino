@@ -1,4 +1,4 @@
-Pair pairs[10];
+Pair pairs[10];// fout = party en settingup 2e keer.
 GameState gameState = GAMEOFF;
 String startstring = "start " + String(id);
 String endstring = "end " + String(id);
@@ -142,12 +142,12 @@ void makepairs() {
   }
 
   for (int i = 0; i < nosteps / 2; i++) {
-    int indexA = random(leftoverSize - 1);
+    int indexA = random(leftoverSize);
     int a = leftovers[indexA];
     leftovers = pop(leftovers, leftoverSize, indexA);
     leftoverSize--;
 
-    int indexB = random(leftoverSize - 1);
+    int indexB = random(leftoverSize);
     int b = leftovers[indexB];
     leftovers = pop(leftovers, leftoverSize, indexB);
     leftoverSize--;
@@ -165,6 +165,7 @@ void makepairs() {
     sendMessage(String(pairs[i].one), sends);
     sendMessage(String(pairs[i].two), sends);
   }
+  delete leftovers;
 }
 
 int* pop(int* arr, int arrSize, int index) {
@@ -225,7 +226,7 @@ void party() {
     if (getVar("setting").value != 2) {
       return;
     }
-    int colourset = random(9);
+    int colourset = random(10);
     for (int j = 0; j < NUMPIXELS; j++) {
       pixels.setPixelColor(j, pixels.Color(gamecolours[colourset].red, gamecolours[colourset].green, gamecolours[colourset].blue));
     }
@@ -249,7 +250,7 @@ void gamecorrect() {
     party();
   }
   if ((millis() - failsafe) > 15000) {
-    setGameState(GAMEOFF);/////toodo
+    settingup();
   }
 }
 void gameoff() {
