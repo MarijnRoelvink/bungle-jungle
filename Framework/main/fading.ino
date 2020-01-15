@@ -1,23 +1,18 @@
-int amount_of_steps = 5;
-int fadeR, fadeG, fadeB;
+long startFade;
 
-void fadingOn() {
-  fadeR = curR / amount_of_steps;
-  fadeG = curG / amount_of_steps;
-  fadeB = curB / amount_of_steps;
-  for (int i = 0; i < amount_of_steps; i++) {
-    curR -= fadeR;
-    curG -= fadeG;
-    curB -= fadeB;
-    for (int k = 0; k < NUMPIXELS; k++) {
-      pixels.setPixelColor(k, pixels.Color(curR, curG, curB));
+void startFading() {
+  startFade = millis();
+}
+
+void fade() {
+  double fadeVal = -1 * ((millis() - startFade) / getVar("fading_time").value - 1);
+  if (fadeVal > 0) {
+    showColor(fadeVal * currColor.red, currColor.green, currColor.blue);
+  } else {
+    setState(OFF);
+    if (lastOn == id) {
+      setState(INACTIVE);
     }
-    pixels.show();
-    if (stateChangeCheckWithDelay(10)) {
-      return;
-    }
+
   }
-  clearPixels();
-  setState(OFF);
-  if(lastOn == id){setState(FIREFLY);}
 }

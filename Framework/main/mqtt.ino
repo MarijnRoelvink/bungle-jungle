@@ -6,7 +6,6 @@ const char pass[] = "interactive";
 const char mqtt_username[] = "35e5494d";
 const char mqtt_password[] = "52d131e1f30b531c";
 char network_address[] = "broker.shiftr.io";
-String lastmessage = "0";
 WiFiClient net;
 MQTTClient client;
 
@@ -41,22 +40,13 @@ void resetMqtt() {
   connect();
 }
 
-int getId() {
-  int index = lastmessage.indexOf(" ");
+int getId(String msg) {
+  int index = msg.indexOf(" ");
   if (index != -1) {
-    return lastmessage.substring(index, lastmessage.length()).toInt();
+    return msg.substring(index, msg.length()).toInt();
   } else {
     return 0;
   }
-}
-
-void polemsg() {
-  int space = lastmessage.indexOf(" ");
-  int comma = lastmessage.indexOf(",");
-  int point = lastmessage.indexOf(".");
-  poleR = lastmessage.substring(space, comma).toInt();
-  poleG = lastmessage.substring(comma + 1, point).toInt();
-  poleB = lastmessage.substring(point + 1, lastmessage.length()).toInt();
 }
 
 void changemessage(String msg) {
@@ -65,10 +55,12 @@ void changemessage(String msg) {
   String varname = msg.substring(first + 1, second);
   int value = msg.substring(second + 1, msg.length()).toInt();
   changeVar(varname, value);
+  if(varname == "idle_setting" && state == INACTIVE) {
+    setState(INACTIVE); //reinitialize idle setting
+  }
 }
 
 void messageReceived(String &topic, String &payload) {
-  lastmessage = payload; //parser, if in deze state, maak state breathing.
   String msg = payload;
   if (msg.startsWith("change setting")) {
     int settingIndex = msg.indexOf(" ", msg.indexOf(" ") + 1);
@@ -78,7 +70,6 @@ void messageReceived(String &topic, String &payload) {
       switch (setting) {
         case 1: ; break;
         case 2: settingup(); break;
-        case 3: marijnSetup(); break;
       }
       return;
     }
@@ -96,20 +87,14 @@ void messageReceived(String &topic, String &payload) {
     changemessage(msg);
   }
   if (getVar("setting").value == 1) {
-    if (msg == "breathing" && (state == OFF || state == FIREFLY)) {
-      setState(BREATHING);
-    }
-    if (msg == "firefly" && state == OFF) {
-      setState(FIREFLY);
-    }
-    if (msg == "fading" && state == STEPPED || state == POLE || state == NPOLE) {
-      setState(FADING);
-    }
-    if (msg == "off" && (state == BREATHING || state == FIREFLY || state == POLE || state == NPOLE)) {
-      setState(OFF);
+    if (msg == "firefly" && state == INACTIVE) {
+      setLauraState(L_FIREFLY);
     }
     if (msg.startsWith("on")) {
-      lastOn = getId();
+      if(state == INACTIVE) {
+        setState(OFF);
+      }
+      lastOn = getId(msg);
     }
     if (msg == "failsafe") {
       failsafe = millis();
@@ -117,19 +102,9 @@ void messageReceived(String &topic, String &payload) {
     if (msg.startsWith("step")) {
       failsafe = millis();
     }
-    if (msg.startsWith("pole") && (state == OFF || state == FIREFLY || state == BREATHING)) {
-      polemsg();
-      setState(POLE);
-    }
-    if (msg.startsWith("npole") && (state == OFF || state == FIREFLY || state == BREATHING)) {
-      polemsg();
-      setState(NPOLE);
-    }
   }
   else if (getVar("setting").value == 2) {
     gameMsg(msg);
-  } else if (getVar("setting").value == 3) {
-    getMarMessage(topic, payload);
   }
 }
 
