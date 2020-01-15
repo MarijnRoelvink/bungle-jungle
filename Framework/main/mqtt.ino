@@ -29,6 +29,7 @@ void connect() {
 
   client.subscribe("/all");
   client.subscribe("/" + String(id));
+  client.subscribe("/check");
 }
 
 

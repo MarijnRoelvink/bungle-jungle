@@ -51,6 +51,7 @@ void iterateOn() {
       setState(STEPPED);
       return;
     }
+    if (settingChange() || getVar("setting").value != 1){ return;}
     crossFade(colours[i]);
   }
 }
@@ -92,7 +93,12 @@ int calculateVal(int step, int val, int i) {
    the value needs to be updated each time, then writing
    the color values to the correct pins.
 */
-
+bool settingChange() { 
+  int cursetting = getVar("setting").value;
+    loopMqtt();
+    if (getVar("setting").value != cursetting){return true;}
+    return false;
+}
 
 void crossFade(int color[3]) {
   // Convert to 0-255
@@ -118,7 +124,7 @@ void crossFade(int color[3]) {
       updateVal(redVal, grnVal, bluVal);
       return;
     }
-    if(stateChangeCheck()){return;}
+    if(settingChange()){return;}
   }
   // Update current values for next loop
   updateVal(redVal, grnVal, bluVal);
