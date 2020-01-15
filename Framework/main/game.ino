@@ -1,4 +1,4 @@
-Pair pairs[10];// fout = party en settingup 2e keer.
+Pair pairs[10];
 GameState gameState = GAMEOFF;
 String startstring = "start " + String(id);
 String endstring = "end " + String(id);
@@ -11,6 +11,7 @@ int savestart;
 int saveend;
 int nosteps;
 
+//all colours in the game
 Colour gamecolours[] = {
   {250, 0, 0},
   {0, 250, 0},
@@ -24,6 +25,7 @@ Colour gamecolours[] = {
   {250, 125, 0},
 };
 
+//what happens when a state changes
 void setGameState(GameState newState) {
   String onstring = "on " + String(id);
   switch (newState) {
@@ -50,6 +52,7 @@ void setGameState(GameState newState) {
   gameState = newState;
 }
 
+//check if someone is stepping on a step
 bool checkGameStepping() {
   if (getRunningAvg() > getVar("threshold").value) {
     setGameState(GAMESTEPPED);
@@ -58,6 +61,7 @@ bool checkGameStepping() {
   return false;
 }
 
+//read the colours from a message
 void colourmessage(String msg) {
   int space = msg.indexOf(" ");
   int first = msg.indexOf(",", space + 1);
@@ -67,6 +71,7 @@ void colourmessage(String msg) {
   blue = (msg.substring(second + 1, msg.length())).toInt();
 }
 
+//compare the made steps to the send start and end. Correct = true, false = false.
 bool checkifright() {
   for (int i = 0; i < nosteps / 2; i++) {
     if (pairs[i].one == savestart) {
@@ -85,6 +90,7 @@ bool checkifright() {
   return false;
 }
 
+//if correct send correct to those steps. same for false.
 void sendifright() {
   if (checkifright()) {
     sendMessage(String(savestart), "correct");
@@ -97,12 +103,16 @@ void sendifright() {
   }
 }
 
+//what to do when a message arrives
 void gameMsg(String msg) {
   if (msg.startsWith("correct")) {
     setGameState(GAMECORRECT);
   }
   if (msg.startsWith("addscore")) {
     score++;
+    if (score >= getVar("goalscore").value) {
+      party();
+    }
   }
   if (msg.startsWith("wrong") && gameState != GAMECORRECT) {
     setGameState(GAMEOFF);
@@ -133,6 +143,7 @@ void gameMsg(String msg) {
   }
 }
 
+//make pairs from all steps
 void makepairs() {
   int pairsSize = 0;
   int leftoverSize = nosteps;
@@ -168,6 +179,7 @@ void makepairs() {
   delete leftovers;
 }
 
+//pop from array function
 int* pop(int* arr, int arrSize, int index) {
   int currIndex = 0;
   for (int i = 0; i < arrSize; i++) {
@@ -179,6 +191,8 @@ int* pop(int* arr, int arrSize, int index) {
   return arr;
 }
 
+//check if state changes, setting changes or someone stepping on step
+//delay also wait_in_millis
 bool gameStateChangeCheckWithDelay(int wait_in_millis) {
   GameState startstate = gameState;
   int cursetting = getVar("setting").value;
@@ -197,6 +211,7 @@ bool gameStateChangeCheckWithDelay(int wait_in_millis) {
   return false;
 }
 
+//check if the setting changes and do wait_in_millis
 bool gameSettingChangeCheckWithDelay(int wait_in_millis) {
   int cursetting = getVar("setting").value;
   unsigned long starttime = millis();
@@ -208,6 +223,8 @@ bool gameSettingChangeCheckWithDelay(int wait_in_millis) {
   }
   return false;
 }
+
+//check if someone is stepping on a step
 void gamestepped() {
   float pressureValue = getRunningAvg();
 
@@ -219,7 +236,12 @@ void gamestepped() {
     sendMessage("all", stepstring);
     lastsend = millis();
   }
+  if ((millis() - failsafe) > 15000) {
+    settingup();
+  }
 }
+
+//enough correct pairs will celebrate. then reset.
 void party() {
   unsigned long startparty = millis();
   while (millis() - startparty < 10 * 1000) {
@@ -240,24 +262,27 @@ void party() {
   settingup();
 }
 
-
+//correct has been send, stay on. 
 void gamecorrect() {
   for (int j = 0; j < NUMPIXELS; j++) {
     pixels.setPixelColor(j, pixels.Color(red, green, blue));
   }
   pixels.show();
-  if (score == getVar("goalscore").value) {
-    party();
-  }
   if ((millis() - failsafe) > 15000) {
     settingup();
   }
 }
+
+//go off
 void gameoff() {
   clearPixels();
   checkGameStepping();
+  if ((millis() - failsafe) > 15000) {
+    settingup();
+  }
 }
 
+//set up function!
 void settingup() { //setup
   nosteps = getVar("noofgamesteps").value;
   score = 0;
@@ -284,6 +309,7 @@ void settingup() { //setup
 
 }
 
+//main "loop" (loops because loop in main)
 void gamemain() {
   switch (gameState) {
     case GAMESTEPPED: gamestepped(); break;
