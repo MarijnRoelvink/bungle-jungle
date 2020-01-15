@@ -3,7 +3,7 @@ int mWaitingTime = 0;
 bool on = false;
 
 void initMarijnIdle() {
-  on = random(0, 1);
+  on = false;
   mWaitingTime = random(getVar("m_timeout_period").value / 2, getVar("m_timeout_period").value);
   mLastSwitch = millis();
 }
