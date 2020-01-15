@@ -1,4 +1,4 @@
-Pair pairs[10];
+Pair pairs[10];// fout = party en settingup 2e keer.
 GameState gameState = GAMEOFF;
 String startstring = "start " + String(id);
 String endstring = "end " + String(id);
@@ -27,19 +27,25 @@ Colour gamecolours[] = {
 void setGameState(GameState newState) {
   String onstring = "on " + String(id);
   switch (newState) {
-    case GAMEFIREFLY: break;
     case GAMESTEPPED: {
-        if (!firstsend) {
-          sendMessage("check", startstring);
-        }
-        else {
-          sendMessage("check", endstring);
+        if (gameState != GAMECORRECT) {
+          if (!firstsend) {
+            sendMessage("check", startstring);
+          }
+          else {
+            sendMessage("check", endstring);
+          }
         }
         sendMessage("all", onstring);
         break;
       }
     case GAMECORRECT: break;
-    case GAMEOFF: break;
+    case GAMEOFF: {
+        if (gameSettingChangeCheckWithDelay(1000)) {
+          return;
+        }
+        break;
+      }
   }
   gameState = newState;
 }
@@ -104,14 +110,8 @@ void gameMsg(String msg) {
   if (msg.startsWith("change")) {
     changemessage(msg);
   }
-  if (msg == "failsafe") {
-    failsafe = millis();
-  }
   if (msg.startsWith("step")) {
     failsafe = millis();
-  }
-  if (msg == "gamefirefly" && gameState == GAMEOFF) {
-    setGameState(GAMEFIREFLY);
   }
   if (msg.startsWith("colour")) {
     colourmessage(msg);
@@ -142,12 +142,12 @@ void makepairs() {
   }
 
   for (int i = 0; i < nosteps / 2; i++) {
-    int indexA = random(leftoverSize - 1);
+    int indexA = random(leftoverSize);
     int a = leftovers[indexA];
     leftovers = pop(leftovers, leftoverSize, indexA);
     leftoverSize--;
 
-    int indexB = random(leftoverSize - 1);
+    int indexB = random(leftoverSize);
     int b = leftovers[indexB];
     leftovers = pop(leftovers, leftoverSize, indexB);
     leftoverSize--;
@@ -165,6 +165,7 @@ void makepairs() {
     sendMessage(String(pairs[i].one), sends);
     sendMessage(String(pairs[i].two), sends);
   }
+  delete leftovers;
 }
 
 int* pop(int* arr, int arrSize, int index) {
@@ -196,30 +197,16 @@ bool gameStateChangeCheckWithDelay(int wait_in_millis) {
   return false;
 }
 
-void gameFireflyOn() {
-  long col[] = {(2 / 3), (1 / 3), (2 / 3)};
-  for (int i = 0, delta = 1; i > -1; i += delta) {
-    if (i == 150) delta = -1;
-    for (int j = 0; j < NUMPIXELS; j++) {
-      pixels.setPixelColor(j, pixels.Color(i/3*2, i/3, i/3*2));
-    }
-    pixels.show();
-    if (gameStateChangeCheckWithDelay(5)) {
-      return;
-    }
-    if (delta == -1 && i == 75) {
-      sendMessage(String(neighbours[random(NEIGHBOURSIZE)]), "gamefirefly");
+bool gameSettingChangeCheckWithDelay(int wait_in_millis) {
+  int cursetting = getVar("setting").value;
+  unsigned long starttime = millis();
+  while (millis() < starttime + wait_in_millis) {
+    loopMqtt();
+    if (getVar("setting").value != cursetting) {
+      return true;
     }
   }
-  setGameState(GAMEOFF);
-  sendMessage("all", "failsafe");
-}
-
-void gameinactive() {
-  if (checkGameStepping()) {
-    return;
-  }
-  gameFireflyOn();
+  return false;
 }
 void gamestepped() {
   float pressureValue = getRunningAvg();
@@ -239,15 +226,17 @@ void party() {
     if (getVar("setting").value != 2) {
       return;
     }
+    int colourset = random(10);
     for (int j = 0; j < NUMPIXELS; j++) {
-      int colourset = random(9);
       pixels.setPixelColor(j, pixels.Color(gamecolours[colourset].red, gamecolours[colourset].green, gamecolours[colourset].blue));
     }
     pixels.show();
-    if (gameStateChangeCheckWithDelay(200)) {
+    if (gameSettingChangeCheckWithDelay(200)) {
       return;
     }
   }
+  pixels.clear();
+  pixels.show();
   settingup();
 }
 
@@ -261,22 +250,12 @@ void gamecorrect() {
     party();
   }
   if ((millis() - failsafe) > 15000) {
-    setGameState(GAMEOFF);
+    settingup();
   }
 }
 void gameoff() {
-  if (gameState != GAMECORRECT) {
-    if (gameStateChangeCheckWithDelay(1000)) {
-      return;
-    }
-    clearPixels();
-  }
-  if (checkGameStepping()) {
-    return;
-  }
-  if ((millis() - failsafe) > 15000 && id == 1) {
-    setGameState(GAMEFIREFLY);
-  }
+  clearPixels();
+  checkGameStepping();
 }
 
 void settingup() { //setup
@@ -288,7 +267,7 @@ void settingup() { //setup
     makepairs();
   }
   while (red == -1) {
-    if (gameStateChangeCheckWithDelay(1)) {
+    if (gameSettingChangeCheckWithDelay(1)) {
       return;
     }
   }
@@ -296,11 +275,8 @@ void settingup() { //setup
     pixels.setPixelColor(j, pixels.Color(red, green, blue));
   }
   pixels.show();
-  if (gameStateChangeCheckWithDelay(getVar("remembertime").value)) {
+  if (gameSettingChangeCheckWithDelay(getVar("remembertime").value)) {
     return;
-  }
-  if (id == 1) {
-    setGameState(GAMEFIREFLY);
   }
   else {
     setGameState(GAMEOFF);
@@ -310,7 +286,6 @@ void settingup() { //setup
 
 void gamemain() {
   switch (gameState) {
-    case GAMEFIREFLY: gameinactive(); break;
     case GAMESTEPPED: gamestepped(); break;
     case GAMECORRECT: gamecorrect(); break;
     case GAMEOFF: gameoff(); break;
