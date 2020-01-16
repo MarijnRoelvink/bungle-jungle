@@ -5,7 +5,7 @@ void setLauraState(LauraState s) {
 }
 
 void lOff() {
-  if ((millis() - failsafe) > 5000 && id == 1) {
+  if ((millis() - failsafe) > 5000 && (id == 1 || id == 20)) {
     setLauraState(L_FIREFLY);
   }
 }
@@ -39,7 +39,12 @@ void lFirefly() {
       return;
     }
     if (delta == -1 && i == 100) {
-      sendMessage(String(neighbours[random(NEIGHBOURSIZE)]), "firefly");
+      int random1 = neighbours[random(NEIGHBOURSIZE)];
+      int random2 = neighbours[random(NEIGHBOURSIZE)];
+      unsigned long start = millis();
+      while(random1 == random2){ random2 = neighbours[random(NEIGHBOURSIZE)]; if((millis()-start)>100){random2 = random(1,21);}}
+      sendMessage(String(random1), "firefly");
+      sendMessage(String(random2), "firefly");
     }
   }
   setLauraState(L_OFF);
@@ -49,7 +54,7 @@ void lFirefly() {
 void initLauraIdle() {
   if (lastOn == id) {
     setLauraState(L_FIREFLY);
-  } else if (lastOn == 0 && id == 1) {
+  } else if (lastOn == 0 && (id == 1 || id == 20)) {
     setLauraState(L_FIREFLY);
   } else {
     setLauraState(L_OFF);
