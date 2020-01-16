@@ -18,7 +18,7 @@ void marijnIdle() {
     } 
     else if (millis() - mLastSwitch > mWaitingTime - fadeTime) {
       //fade out
-      fadeValue = -1 * ((millis() - (mLastSwitch + mWaitingTime - fadeTime)) / fadeTime - 1);
+      fadeValue = max(0, -1 * ((millis() - (mLastSwitch + mWaitingTime - fadeTime)) / fadeTime - 1));
     }
     //show colors
     showColor(fadeValue*125, fadeValue*125, fadeValue*255);

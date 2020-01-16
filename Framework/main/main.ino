@@ -56,9 +56,9 @@ Var vars[] = {
   {"noofgamesteps", 20},
   
   //marijn idle vars
-  {"m_firefly_period", 1000},
+  {"m_firefly_period", 3000},
   {"m_timeout_period", 10000},
-  {"m_fade_percentage", 50}
+  {"m_fade_percentage", 90}
 
 };
 
