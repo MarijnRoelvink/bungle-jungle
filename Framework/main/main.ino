@@ -200,6 +200,9 @@ void setup()
   if (getVar("setting").value == 2) {
     settingup();
   }
+  if(id == 20) {
+    sendToAll();
+  }
 }
 
 void loop()
