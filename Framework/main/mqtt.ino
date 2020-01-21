@@ -67,6 +67,7 @@ void messageReceived(String &topic, String &payload) {
     if (settingIndex != -1) {
       int setting = msg.substring(settingIndex, msg.length()).toInt();
       changeVar("setting", setting);
+      sendMessage("all", "up " + String(id));
       switch (setting) {
         case 1: ; break;
         case 2: settingup(); break;
