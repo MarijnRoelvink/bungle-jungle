@@ -239,9 +239,6 @@ void gamestepped() {
     sendMessage("all", stepstring);
     lastsend = millis();
   }
-  //if ((millis() - failsafe) > 30000) { do we want this?
-  //  settingup();
-  //}
 }
 
 //enough correct pairs will celebrate. then reset.
@@ -271,18 +268,12 @@ void gamecorrect() {
     pixels.setPixelColor(j, pixels.Color(red, green, blue));
   }
   pixels.show();
-  //if ((millis() - failsafe) > 30000) { do we want this?
-  //  settingup();
-  //}
 }
 
 //go off
 void gameoff() {
   clearPixels();
   checkGameStepping();
-  //if ((millis() - failsafe) > 30000) { do we want this?
-  //  settingup();
-  //}
 }
 
 //set up function!
