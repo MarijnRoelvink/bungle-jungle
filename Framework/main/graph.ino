@@ -1,3 +1,4 @@
+//The graph with neighbours
 const Edge graph[] = 
 {{10, 6},
 {6, 18},
@@ -32,7 +33,9 @@ const Edge graph[] =
 {4, 20},
 {8, 20}};
 
-
+//goal: change to the correct function
+//input: edge = edge connected to neighbour v, v = id to find neighbour of.
+//output: the neighbour of int v at the other side of the edge
 int getNeighbour(Edge edge, int v) {
   if(edge.a == v) {
     return edge.b;
@@ -43,6 +46,9 @@ int getNeighbour(Edge edge, int v) {
   }
 }
 
+//goal: get the amount of neighbours from id
+//input: id = id of step to find amount of neighbours of
+//output: the size of neighbours
 int getNeighboursSize(int id) {
   int graphSize = sizeof(graph)/sizeof(Edge);
   int totalSize = 0;
@@ -55,6 +61,9 @@ int getNeighboursSize(int id) {
   return totalSize;
 }
 
+//goal: get the neighbours from id
+//input: neighbs = pointer to neighbours, id = id of step
+//output: pointer to neighbours
 int* getNeighbours(int* neighbs, int id) {
   int graphSize = sizeof(graph)/sizeof(Edge);
   int totalSize = 0;
@@ -68,6 +77,9 @@ int* getNeighbours(int* neighbs, int id) {
   return neighbs;
 }
 
+//goal: get the poleneighbours from id
+//input: poleNeighbs = pointer to poleneighbours, id = id of step
+//output: pointer to poleneighbours
 int* getPoleNeighbours(int* poleNeighbs, int id) {
   id--;
   int polePos = id%4;

@@ -1,4 +1,3 @@
-
 String thresholds[][2] = {
   {"20", "3"},
   {"19", "3"},
@@ -35,6 +34,9 @@ String timeouts[][2] {
   {"1", "3000"}
 };
 
+//goal: send all steps the variables of the values
+//input: none
+//output: none
 void sendToAll() {
   for (int i = 0; i < 20; i++) {
     sendMessage(thresholds[i][0], "change threshold " + thresholds[i][1]);

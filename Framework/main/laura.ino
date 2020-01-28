@@ -1,15 +1,24 @@
 LauraState ls = L_OFF;
 
+//goal: change the state of laura
+//input: none
+//output: none
 void setLauraState(LauraState s) {
   ls = s;
 }
 
+//goal: the step is off, has a failsafe if nothing got send
+//input: none
+//output: none
 void lOff() {
   if ((millis() - failsafe) > 5000 && (id == 1 || id == 20)) {
     setLauraState(L_FIREFLY);
   }
 }
 
+//goal: wait function that checks what changes
+//input: t = time to delay
+//output: boolean true if anything happens = state changing or people stepping
 bool delayAndCheck(int t) {
   LauraState startstate = ls;
   unsigned long starttime = millis();
@@ -27,6 +36,9 @@ bool delayAndCheck(int t) {
   return false;
 }
 
+//goal: turn on the light and send message to next neighbour to turn on
+//input: none
+//output: none
 void lFirefly() {
   for (int i = 0, delta = 1; i > -1; i += delta) {
     if (i == 150) delta = -1;
@@ -51,6 +63,9 @@ void lFirefly() {
   sendMessage("all", "failsafe");
 }
 
+//goal: initialization of the firefly effect
+//input: none
+//output: none
 void initLauraIdle() {
   if (lastOn == id) {
     setLauraState(L_FIREFLY);
@@ -61,6 +76,9 @@ void initLauraIdle() {
   }
 }
 
+//goal: change to the correct function
+//input: none
+//output: none
 void lauraIdle() {
   switch (ls) {
     case L_OFF: lOff();

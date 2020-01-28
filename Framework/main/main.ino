@@ -1,7 +1,8 @@
 #include <Adafruit_NeoPixel.h>
-#define PIN        5 // On Trinket or Gemma, suggest changing this to 1
-#define NUMPIXELS 10 // Popular NeoPixel ring size
+#define PIN        5 
+#define NUMPIXELS 10 
 
+//declarations of variables, edges, pairs and colour
 struct Var {
   String varName;
   int value;
@@ -19,7 +20,7 @@ struct Colour {
   int red, green, blue;
 };
 
-
+//all states of the state machines
 enum State {
   INACTIVE,
   STEPPING,
@@ -29,7 +30,6 @@ enum State {
 };
 
 enum GameState {
-  GAMEFIREFLY,
   GAMESTEPPED,
   GAMECORRECT,
   GAMEOFF
@@ -42,6 +42,7 @@ enum LauraState {
 
 int getNeighboursSize(int id); //prototype
 
+//all variables changable over server
 Var vars[] = {
   //global vars
   {"threshold", 4},
@@ -62,6 +63,7 @@ Var vars[] = {
 
 };
 
+//all colours defined
 int colourSize = 7;
 Colour colours[] = {
   {100, 0, 0}, //red
@@ -74,7 +76,7 @@ Colour colours[] = {
 };
 
 int currIndex = 0;
-int id = 14;                         //change per step
+int id = 9;                         //change per step
 int lastOn = 0;
 const int NEIGHBOURSIZE = getNeighboursSize(id);
 int* neighbours = new int[8];
@@ -88,7 +90,9 @@ String stepstring = "step " + String(id);
 String onstring = "on " + String(id);
 Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
-
+//goal: change current value of variableName to value of input
+//input: variableName= name of variable to change. value= new value for the variable
+//output: none
 void changeVar(String variableName, int value) {
   for (int i = 0; i < (sizeof(vars) / sizeof(vars[0])); i++) {
     if (variableName == vars[i].varName) {
@@ -97,6 +101,9 @@ void changeVar(String variableName, int value) {
   }
 }
 
+//goal: get the variable requested
+//input: variableName= variable to get
+//output: the requested variable
 Var getVar(String variableName) {
   for (int i = 0; i < (sizeof(vars) / sizeof(vars[0])); i++) {
     if (variableName == vars[i].varName) {
@@ -108,7 +115,9 @@ Var getVar(String variableName) {
 
 }
 
-
+//goal: check if someone is stepping on a step
+//input: none
+//output: boolean true if someone is stepping, false if not.
 bool checkStepping() {
   if (getRunningAvg() > getVar("threshold").value) {
     touched = millis();
@@ -118,6 +127,9 @@ bool checkStepping() {
   return false;
 }
 
+//goal: switch the idle modus
+//input: none
+//output: none
 void inactive() {
   switch (getVar("idle_setting").value) {
     case 1: lauraIdle(); break;
@@ -125,6 +137,9 @@ void inactive() {
   }
 }
 
+//goal: turn the light of the step on and send to others that someone is stepping
+//input: none
+//output: none
 void stepping() {
   showColor(currColor);
   float pressureValue = getRunningAvg();
@@ -139,6 +154,9 @@ void stepping() {
   }
 }
 
+//goal: wait for waittime seconds then start fading
+//input: none
+//output: none
 void stepped() {
   showColor(currColor);
   if (millis() - touched > getVar("waittime").value) {
@@ -150,14 +168,23 @@ void stepped() {
   }
 }
 
+//goal: start fading
+//input: none
+//output: none
 void fading() {
   fade();
 }
 
+//goal: nothing happens because step is off
+//input: none
+//output: none
 void off() {
   
 }
 
+//goal: changes the state and does the things that need to be done for the state change
+//input: newState = new state to go to
+//output: none
 void setState(State newState) {
   switch (newState) {
     case INACTIVE:
@@ -185,6 +212,9 @@ void setState(State newState) {
   state = newState;
 }
 
+//goal: setup function, one time only
+//input: none
+//output: none
 void setup()
 {
   Serial.begin(9600);
@@ -205,6 +235,10 @@ void setup()
   }
 }
 
+
+//goal: calls the correct function for every state
+//input: none
+//output: none
 void loop()
 {
   loopPressureSensor();

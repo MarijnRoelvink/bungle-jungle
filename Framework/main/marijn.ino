@@ -2,12 +2,18 @@ int mLastSwitch = 0;
 int mWaitingTime = 0;
 bool on = false;
 
+//goal: initialize marijn idle
+//input: none
+//output: none
 void initMarijnIdle() {
   on = false;
   mWaitingTime = random(getVar("m_timeout_period").value / 2, getVar("m_timeout_period").value);
   mLastSwitch = millis();
 }
 
+//goal: turn all the lights on for random time
+//input: none
+//output: none
 void marijnIdle() {
   if (on) {
     double fadeTime = mWaitingTime * getVar("m_fade_percentage").value / (100 * 2.0);

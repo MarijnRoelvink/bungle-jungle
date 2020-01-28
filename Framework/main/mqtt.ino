@@ -9,6 +9,9 @@ char network_address[] = "broker.shiftr.io";
 WiFiClient net;
 MQTTClient client;
 
+//goal: connect to wifi and broker
+//input: none
+//output: none
 void connect() {
   Serial.print("checking wifi...");
   while (WiFi.status() != WL_CONNECTED) {
@@ -31,7 +34,9 @@ void connect() {
   client.subscribe("/check");
 }
 
-
+//goal: reset the mqtt
+//input: none
+//output: none
 void resetMqtt() {
   Serial.println("Disconnecting!");
   client.disconnect();
@@ -40,6 +45,9 @@ void resetMqtt() {
   connect();
 }
 
+//goal: get the id send from a random message
+//input: msg = message to get id from
+//output: the id read from the message
 int getNumber(String msg) {
   int index = msg.indexOf(" ");
   if (index != -1) {
@@ -49,6 +57,9 @@ int getNumber(String msg) {
   }
 }
 
+//goal: receive messages starting with change to change the value
+//input: msg = message to read the values uit
+//output: none
 void changemessage(String msg) {
   int first = msg.indexOf(" ");
   int second = msg.indexOf(" ", first + 1);
@@ -60,6 +71,9 @@ void changemessage(String msg) {
   }
 }
 
+//goal: receive message and send them to the correct functions
+//input: topic = receiver of the message. payload = contents of message
+//output: none
 void messageReceived(String &topic, String &payload) {
   String msg = payload;
   if (msg.startsWith("change setting")) {
@@ -115,10 +129,16 @@ void messageReceived(String &topic, String &payload) {
   }
 }
 
+//goal: send message
+//input: target = receivers of the message. msg = message to be send
+//output: none
 void sendMessage(String target, String msg) {
   client.publish("/" + target, msg);
 }
 
+//goal: initialization of the mqtt
+//input: none
+//output: none
 void initMqtt() {
   Serial.println("WiFi.begin");
   WiFi.begin(ssid, pass);
@@ -127,6 +147,9 @@ void initMqtt() {
   connect();
 }
 
+//goal: loop that checks the mqtt
+//input: none
+//output: none
 void loopMqtt() {
   client.loop();
   if (!client.connected()) {
